@@ -1,41 +1,9 @@
 // app/documents/[documentId]/view/page.tsx
-import fs from 'fs/promises';
-import path from 'path';
 import { notFound } from 'next/navigation';
 import { Metadata, ResolvingMetadata } from 'next';
 import Link from 'next/link';
 import ShareButtonClient from './../../components/ShareButtonClient'; // Đảm bảo đường dẫn đúng
-
-// --- Định nghĩa Type ---
-interface DocumentLinkItem {
-  id: string;
-  title: string;
-  description?: string;
-  category: string;
-  skill?: string;
-  googleDriveLink: string;
-  previewImageUrl?: string; 
-  fileType: string;
-  year?: number;
-}
-
-const DOCUMENTS_DATA_PATH = path.join(process.cwd(), 'data', 'document_links.json');
-
-async function getAllDocuments(): Promise<DocumentLinkItem[]> {
-  try {
-    const fileContent = await fs.readFile(DOCUMENTS_DATA_PATH, 'utf-8');
-    const documents: DocumentLinkItem[] = JSON.parse(fileContent);
-    return Array.isArray(documents) ? documents : [];
-  } catch (error) {
-    console.error("Lỗi khi đọc data/document_links.json trong trang view:", error);
-    return [];
-  }
-}
-
-async function getDocumentById(documentId: string): Promise<DocumentLinkItem | undefined> {
-  const documents = await getAllDocuments();
-  return documents.find(doc => doc.id === documentId);
-}
+import { getAllDocuments, getDocumentData } from '@/lib/documentDataCache'; // Use cached data loader
 
 export async function generateStaticParams() {
   const documents = await getAllDocuments();
@@ -50,9 +18,9 @@ type Props = {
 };
 
 export async function generateMetadata({ params: paramsPromise }: Props, parent: ResolvingMetadata): Promise<Metadata> {
-  const params = await paramsPromise; // <<<< THÊM AWAIT Ở ĐÂY
+  const params = await paramsPromise;
   const documentId = params.documentId;
-  const doc = await getDocumentById(documentId);
+  const doc = await getDocumentData(documentId); // Use cached data
 
   const siteBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://topikgo.com";
 
@@ -96,10 +64,10 @@ const BackIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 2
 const ErrorIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-red-400 mb-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6H10v2.25A7.5 7.5 0 0010 18c0 4.142 3.358 7.5 7.5 7.5s7.5-3.358 7.5-7.5A7.5 7.5 0 0010 3V1.5m0 12.75H3.75M3.75 12.75c0-4.142 3.358-7.5 7.5-7.5M12.75 3v1.5M16.5 3.75V.75M18.75 3a2.25 2.25 0 00-2.25-2.25H9.75A2.25 2.25 0 007.5 3v1.5M15 13.5H9" /></svg>;
 
 // --- Page Component ---
-export default async function DocumentViewPage({ params: paramsPromise }: Props) { // Đổi tên params thành paramsPromise
-  const params = await paramsPromise; // <<<< THÊM AWAIT Ở ĐÂY
+export default async function DocumentViewPage({ params: paramsPromise }: Props) {
+  const params = await paramsPromise;
   const documentId = params.documentId;
-  const doc = await getDocumentById(documentId);
+  const doc = await getDocumentData(documentId); // Use cached data
 
   if (!doc) {
     notFound();

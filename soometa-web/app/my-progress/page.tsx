@@ -6,40 +6,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // Import nếu bạn cần redirect
 import { useAuthStore } from './../store/authStore'; // Điều chỉnh đường dẫn cho chính xác
 
-// Import cho Chart.js và react-chartjs-2
-import { Line, Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-  TooltipItem,      // Kiểu cho context của tooltip callback
-  ChartOptions,     // Kiểu chính cho options của Chart
-  ScriptableContext, // Cho các giá trị có thể là hàm (ví dụ: backgroundColor)
-  ChartData,        // Kiểu cho data của Chart
-  ChartDataset      // Kiểu cho dataset
-} from 'chart.js';
+// Import cho recharts
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 import { usePracticeStatistics, parseQuestionId } from '../practice/StatisticPieChart';
 import { hardcodedInstructions } from '../practice/PracticeByTypeClient';
 import InstructionStatsChart from '../components/InstructionStatsChart';
-
-// Đăng ký các thành phần cần thiết cho Chart.js
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
 
 const NEXT_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
@@ -185,135 +157,31 @@ export default function MyProgressPage() {
       return new Date(dateString).toLocaleDateString('vi-VN', { month: '2-digit', day: '2-digit', year: '2-digit' });
     } catch { return "N/A"; }
   }, []);
-  
-  const chartData = useMemo((): ChartData<'line', number[], string> => {
+
+  const chartData = useMemo(() => {
     if (!isClient || !progressData?.scoreProgression || progressData.scoreProgression.length === 0) {
-      return { labels: [], datasets: [] as ChartDataset<'line', number[]>[] };
+      return [];
     }
     const sortedProgression = [...progressData.scoreProgression].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    const datasetItem: ChartDataset<'line', number[]> = {
-        label: 'Điểm luyện thi (%)',
-        data: sortedProgression.map(p => p.percentage),
-        fill: true,
-        borderColor: 'rgb(59, 130, 246)', 
-        backgroundColor: (context: ScriptableContext<"line">) => {
-          const chart = context.chart;
-          const {ctx, chartArea} = chart;
-          if (!chartArea) return 'rgba(59, 130, 246, 0.1)';
-          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
-          gradient.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
-          return gradient;
-        },
-        tension: 0.3, 
-        pointRadius: 4,
-        pointBackgroundColor: 'rgb(59, 130, 246)',
-        pointBorderColor: '#fff',
-        pointHoverRadius: 7,
-        pointHoverBorderWidth: 2,
-        pointHoverBackgroundColor: 'rgb(59, 130, 246)',
-        pointHoverBorderColor: '#fff',
-    };
-
-    return {
-      labels: sortedProgression.map(p => formatDateForChart(p.date)),
-      datasets: [datasetItem],
-    };
+    return sortedProgression.map(p => ({
+      date: formatDateForChart(p.date),
+      percentage: p.percentage,
+      examName: p.examName
+    }));
   }, [progressData, isClient, formatDateForChart]);
 
-  const chartOptions = useMemo((): ChartOptions<'line'> => {
-    if (!isClient) return { responsive: true, maintainAspectRatio: false };
-    
-    const isDarkMode = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const tickColor = isDarkMode ? '#94a3b8' : '#6b7280'; 
-    const titleColor = isDarkMode ? '#e2e8f0' : '#1f2937'; 
-    const legendColor = isDarkMode ? '#cbd5e1' : '#4b5563'; 
-    const gridColor = isDarkMode ? 'rgba(71, 85, 105, 0.2)' : 'rgba(226, 232, 240, 0.4)';
-
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top' as const,
-          labels: { font: { size: 12, family: 'Inter, system-ui, sans-serif' }, color: legendColor, padding: 20 }
-        },
-        title: {
-          display: true,
-          text: 'Biểu đồ Tiến độ Điểm số Theo Thời Gian',
-          font: { size: 18, weight: 600, family: 'Inter, system-ui, sans-serif' }, // weight là number
-          padding: { top: 10, bottom: 25 },
-          color: titleColor
-        },
-        tooltip: {
-          enabled: true,
-          backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.9)' : 'rgba(17, 24, 39, 0.9)',
-          titleColor: '#fff',
-          bodyColor: '#e5e7eb',
-          titleFont: { size: 13, weight: 'bold' as const, family: 'Inter, system-ui, sans-serif' },
-          bodyFont: { size: 12, family: 'Inter, system-ui, sans-serif' },
-          padding: 12, cornerRadius: 6, boxPadding: 4,
-          borderColor: isDarkMode ? 'rgba(100,116,139,0.5)' : 'rgba(107,114,128,0.3)',
-          borderWidth: 1,
-          callbacks: {
-              label: function(context: TooltipItem<'line'>) { 
-                  let labelParts: string[] = [];
-                  const datasetLabelText = context.dataset.label || '';
-                  if (datasetLabelText) { 
-                    labelParts.push(`${datasetLabelText}: ${context.parsed.y !== null ? context.parsed.y + '%' : 'N/A'}`);
-                  } else if (context.parsed.y !== null) {
-                    labelParts.push(`${context.parsed.y}%`);
-                  }
-                  
-                  const dataIndex = context.dataIndex;
-                  // Đảm bảo progressData và scoreProgression tồn tại
-                  if (progressData && progressData.scoreProgression && dataIndex < progressData.scoreProgression.length) {
-                    const sortedProgressionForTooltip = [...progressData.scoreProgression].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-                    const examName = sortedProgressionForTooltip[dataIndex]?.examName;
-                    if (examName) {
-                        labelParts.push(`Đề: ${examName.length > 35 ? examName.substring(0, 32) + '...' : examName}`);
-                    }
-                  }
-                  return labelParts;
-              }
-          }
-        }
-      },
-      scales: {
-        y: {
-            beginAtZero: true,
-            max: 100,
-            ticks: { /* ... */ },
-            grid: { 
-              color: gridColor, 
-              // drawBorder: false, // XÓA DÒNG NÀY
-            },
-            border: { // THÊM HOẶC SỬA ĐỐI TƯỢNG NÀY
-              display: false, // Ẩn đường viền của trục Y
-              // dash: [5, 5], // Ví dụ: làm đường viền đứt nét
-              // color: 'red',
-              // width: 1
-            }
-          },
-          // Tương tự cho trục x nếu cần
-          x: {
-            ticks: { /* ... */ },
-            grid: { 
-              display: false // Ẩn các đường lưới của trục X
-            },
-            border: {
-                display: false // Ẩn đường viền của trục X
-            }
-          }
-      },
-      interaction: { mode: 'index' as const, intersect: false },
-      elements: {
-        line: { tension: 0.3 },
-        point: { radius: 3, hoverRadius: 6, hoverBorderWidth: 2, backgroundColor: 'rgb(59, 130, 246)' }
-      }
-    };
-  }, [progressData, isClient]); 
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-gray-900 text-white p-3 rounded shadow-lg border border-gray-700">
+          <p className="font-semibold">{`Điểm: ${data.percentage}%`}</p>
+          <p className="text-sm text-gray-300">{`Đề: ${data.examName.length > 35 ? data.examName.substring(0, 32) + '...' : data.examName}`}</p>
+        </div>
+      );
+    }
+    return null;
+  }; 
 
   // ---- RENDER LOGIC ----
   if (!isClient || isLoadingAuth) {
@@ -394,8 +262,43 @@ export default function MyProgressPage() {
             <section className="mb-12">
                 <h2 className="text-2xl md:text-3xl font-semibold text-gray-700 dark:text-slate-200 mb-6 text-center sm:text-left">Biểu đồ tiến độ điểm số (%)</h2>
                 <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl shadow-xl h-72 sm:h-80 md:h-96 border border-gray-200 dark:border-slate-700">
-                {(isClient && progressData.scoreProgression && progressData.scoreProgression.length > 1 && chartData.datasets.length > 0 && chartData.datasets[0]?.data?.length > 0) ? (
-                    <Line options={chartOptions} data={chartData} />
+                {(isClient && progressData.scoreProgression && progressData.scoreProgression.length > 1 && chartData.length > 0) ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                        <defs>
+                          <linearGradient id="colorPercentage" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="rgb(59, 130, 246)" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="rgb(59, 130, 246)" stopOpacity={0.05}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(226, 232, 240, 0.4)" />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#6b7280"
+                          style={{ fontSize: '12px' }}
+                        />
+                        <YAxis
+                          domain={[0, 100]}
+                          stroke="#6b7280"
+                          style={{ fontSize: '12px' }}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend
+                          wrapperStyle={{ fontSize: '12px', fontFamily: 'Inter, system-ui, sans-serif' }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="percentage"
+                          stroke="rgb(59, 130, 246)"
+                          strokeWidth={2}
+                          fill="url(#colorPercentage)"
+                          fillOpacity={1}
+                          dot={{ fill: 'rgb(59, 130, 246)', strokeWidth: 2, stroke: '#fff', r: 4 }}
+                          activeDot={{ r: 7, strokeWidth: 2 }}
+                          name="Điểm luyện thi (%)"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
                 ) : (
                     <p className="text-center text-gray-500 dark:text-slate-400 h-full flex items-center justify-center">
                     {(isClient && progressData.scoreProgression && progressData.scoreProgression.length <= 1) ? "Cần ít nhất 2 bài làm để vẽ biểu đồ tiến độ." : "Không đủ dữ liệu hoặc đang tải biểu đồ..."}

@@ -1,34 +1,7 @@
 // app/documents/page.tsx
-import fs from 'fs/promises';
-import path from 'path';
 import DocumentBrowser from './components/DocumentBrowser'; // Import Client Component
 import { Metadata } from 'next';
-
-// Định nghĩa Type (cần nhất quán với Client Component)
-interface DocumentLinkItem {
-  id: string;
-  title: string;
-  description?: string;
-  category: string;
-  skill?: string;
-  googleDriveLink: string;
-  fileType: string;
-  year?: number;
-}
-
-const DOCUMENTS_DATA_PATH = path.join(process.cwd(), 'data', 'document_links.json');
-
-async function getDocumentLinks(): Promise<DocumentLinkItem[]> {
-  try {
-    const fileContent = await fs.readFile(DOCUMENTS_DATA_PATH, 'utf-8');
-    const documents: DocumentLinkItem[] = JSON.parse(fileContent);
-    if (!Array.isArray(documents)) return [];
-    return documents;
-  } catch (error) {
-    console.error("Lỗi khi đọc data/document_links.json:", error);
-    return [];
-  }
-}
+import { getAllDocuments, DocumentLinkItem } from '@/lib/documentDataCache'; // Use cached data loader
 
 export const metadata: Metadata = {
   title: 'Kho Tài Liệu TOPIK - TopikGo',
@@ -37,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DocumentsPageContainer() {
-  const documents = await getDocumentLinks();
+  const documents = await getAllDocuments(); // Use cached data loader
 
   return (
     <div className="container mx-auto p-6 md:p-10 lg:p-12 dark:bg-slate-900 min-h-screen">

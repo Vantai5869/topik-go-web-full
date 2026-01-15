@@ -2,17 +2,6 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Select, { MultiValue } from 'react-select';
-import { Bar, Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-} from 'chart.js';
 
 // Import types from the new types.ts file
 import { Exam, InstructionGroup, Question, Option, QuestionContent, SharedContent, ReactSelectOption, PracticeConfig, DisplayGroup } from './types'; // Adjust import path
@@ -26,8 +15,6 @@ import PracticeQuestionList from './PracticeQuestionList'; // Adjust import path
 import { useAuthStore } from '../store/authStore';
 import { usePracticeStatistics, parseQuestionId, StatisticPieChart } from './StatisticPieChart';
 import { api } from '@/lib/configAxios';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 // --- HARDCODED INSTRUCTIONS DATA ---
 export const hardcodedInstructions: { [level: string]: { [skill: string]: string[] } } = {
@@ -430,47 +417,6 @@ const PracticeByTypeClient: React.FC<PracticeByTypeClientProps> = ({ allExams })
       '듣기',
       activeFilter
     );
-
-    const pieData = useMemo(() => {
-      const labels = practiceHistoryStats.map(h => h.questionId);
-      const data = labels.map(id => {
-        const parsed = parseQuestionId(id);
-        return parsed && parsed.level === selectedLevel && parsed.skill === selectedSkill ? 1 : 0;
-      });
-      return {
-        labels,
-        datasets: [
-          {
-            data,
-            backgroundColor: [
-              '#3b82f6', '#10b981', '#f59e42', '#ef4444', '#a78bfa', '#f472b6', '#facc15', '#38bdf8', '#34d399', '#fb7185', '#6366f1', '#fbbf24', '#eab308', '#14b8a6', '#8b5cf6', '#f87171', '#f472b6', '#fcd34d', '#60a5fa', '#4ade80', '#fbbf24', '#f87171', '#a3e635', '#f472b6', '#f59e42', '#fbbf24', '#f472b6', '#f87171', '#a78bfa', '#f59e42'
-            ],
-            borderWidth: 2,
-            borderColor: '#fff',
-            hoverOffset: 8,
-          }
-        ]
-      };
-    }, [practiceHistoryStats, selectedLevel, selectedSkill]);
-
-    const pieOptions = {
-      responsive: true,
-      plugins: {
-        legend: { position: 'right' as const, labels: { font: { size: 15 }, boxWidth: 22 } },
-        tooltip: {
-          callbacks: {
-            label: function(context: import('chart.js').TooltipItem<'pie'>) {
-              const label = context.label || '';
-              const value = Number(context.raw);
-              const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-              const percent = total > 0 ? Math.round((value / total) * 100) : 0;
-              return `${label}: ${value} câu (${percent}%)`;
-            }
-          }
-        },
-        title: { display: false }
-      }
-    };
 
     const getAnsweredIndex = useCallback((uniqueQuestionId: string) => {
       if (activeFilter === FILTER_UNDONE) {

@@ -3,6 +3,7 @@ import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import EnhancedActivityTracker from './components/EnhancedActivityTracker';
 import ResizableLayout from './components/ResizableLayout';
+import ExamDataPreloader from './components/ExamDataPreloader';
 import './globals.css'; // Import CSS toàn cục
 import { cookies } from 'next/headers';
 
@@ -142,6 +143,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           defaultCollapsed={defaultCollapsed}
           leftContent={
             <>
+              <ExamDataPreloader />
               <Navbar />
               <main>{children}</main>
               <Footer />

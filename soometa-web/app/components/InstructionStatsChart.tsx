@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pie } from 'react-chartjs-2';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { usePracticeStatistics } from '../practice/StatisticPieChart';
 
 interface Props {
@@ -25,6 +25,34 @@ const InstructionStatsChart: React.FC<Props> = ({
   // Debug: log props and fetched data
   console.log('[InstructionStatsChart]', { userId, selectedLevel, selectedSkill, practiceHistory });
 
+  const COLORS = [
+    '#3b82f6', '#10b981', '#f59e42', '#ef4444', '#a78bfa', '#f472b6', '#facc15', '#38bdf8',
+    '#34d399', '#fb7185', '#6366f1', '#fbbf24', '#eab308', '#14b8a6', '#8b5cf6', '#f87171',
+    '#f472b6', '#fcd34d', '#60a5fa', '#4ade80', '#fbbf24', '#f87171', '#a3e635', '#f472b6',
+    '#f59e42', '#fbbf24', '#f472b6', '#f87171', '#a78bfa', '#f59e42'
+  ];
+
+  const pieData = filteredInstructions.map((instr, index) => ({
+    name: instr,
+    value: instructionStats[instr].total,
+    fill: COLORS[index % COLORS.length]
+  }));
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      const total = pieData.reduce((sum, item) => sum + item.value, 0);
+      const percent = total > 0 ? Math.round((data.value / total) * 100) : 0;
+      return (
+        <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+          <p className="font-medium">{data.name}</p>
+          <p className="text-sm text-gray-600">{`${data.value} câu (${percent}%)`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <section className="my-12">
       <h2 className="text-2xl md:text-3xl font-semibold text-gray-700 dark:text-slate-200 mb-6 text-center sm:text-left">
@@ -43,41 +71,31 @@ const InstructionStatsChart: React.FC<Props> = ({
       ) : (
         <div className="flex flex-col md:flex-row md:items-center gap-8">
           <div className="w-full md:w-1/2 flex justify-center">
-            <Pie
-              data={{
-                labels: filteredInstructions,
-                datasets: [
-                  {
-                    data: filteredInstructions.map(instr => instructionStats[instr].total),
-                    backgroundColor: [
-                      '#3b82f6', '#10b981', '#f59e42', '#ef4444', '#a78bfa', '#f472b6', '#facc15', '#38bdf8', '#34d399', '#fb7185', '#6366f1', '#fbbf24', '#eab308', '#14b8a6', '#8b5cf6', '#f87171', '#f472b6', '#fcd34d', '#60a5fa', '#4ade80', '#fbbf24', '#f87171', '#a3e635', '#f472b6', '#f59e42', '#fbbf24', '#f472b6', '#f87171', '#a78bfa', '#f59e42'
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                  }
-                ]
-              }}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: { position: 'right', labels: { font: { size: 15 }, boxWidth: 22 } },
-                  tooltip: {
-                    callbacks: {
-                      label: function (context) {
-                        const label = context.label || '';
-                        const value = Number(context.raw);
-                        const dataArr = Array.isArray(context.dataset.data) ? context.dataset.data.map(Number) : [];
-                        const total = dataArr.reduce((a, b) => a + b, 0);
-                        const percent = total > 0 ? Math.round((value / total) * 100) : 0;
-                        return `${label}: ${value} câu (${percent}%)`;
-                      }
-                    }
-                  },
-                  title: { display: false }
-                }
-              }}
-              height={320}
-            />
+            <ResponsiveContainer width="100%" height={320}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  dataKey="value"
+                  stroke="#fff"
+                  strokeWidth={2}
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend
+                  layout="vertical"
+                  align="right"
+                  verticalAlign="middle"
+                  wrapperStyle={{ fontSize: '15px' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
           <div className="w-full md:w-1/2 overflow-x-auto">
             <table className="w-full text-sm mb-6 border rounded-lg overflow-hidden">

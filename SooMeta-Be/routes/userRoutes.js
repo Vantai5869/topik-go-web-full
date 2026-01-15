@@ -106,8 +106,14 @@ router.post('/', async (req, res) => {
 router.get('/', authMiddleware, adminAuthMiddleware, async (req, res) => {
     try {
         // Route này cho admin, nên có thể trả về đầy đủ thông tin (trừ password)
-        const users = await User.find().select('-password'); 
-        res.json(users.map(user => user.toJSON())); // Áp dụng toJSON để có 'id' và bỏ '_id', '__v'
+        // Sử dụng .lean() để tăng performance (trả về plain object thay vì Mongoose document)
+        const users = await User.find().select('-password').lean();
+        // Transform _id to id và loại bỏ __v
+        const transformedUsers = users.map(user => {
+            const { _id, __v, ...rest } = user;
+            return { id: _id, ...rest };
+        });
+        res.json(transformedUsers);
     } catch (error) {
         console.error("Error in GET /users (admin):", error);
         res.status(500).json({ error: 'Lỗi khi lấy danh sách người dùng.' });
@@ -126,10 +132,12 @@ router.get('/:id', authMiddleware, async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ message: 'ID người dùng không hợp lệ.' });
         }
-        // Route này cho admin hoặc user xem chính mình, có thể trả về đầy đủ thông tin
-        const user = await User.findById(req.params.id).select('-password');
+        // Sử dụng .lean() để tăng performance (trả về plain object thay vì Mongoose document)
+        const user = await User.findById(req.params.id).select('-password').lean();
         if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
-        res.json(user.toJSON());
+        // Transform _id to id và loại bỏ __v
+        const { _id, __v, ...rest } = user;
+        res.json({ id: _id, ...rest });
     } catch (error) {
         console.error(`Error in GET /users/${req.params.id}:`, error);
         res.status(500).json({ error: 'Lỗi khi lấy thông tin người dùng.' });

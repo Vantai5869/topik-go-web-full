@@ -1,12 +1,11 @@
 // app/exams/[examId]/page.tsx
-import fs from 'fs/promises';
-import path from 'path';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { ExamData } from '../../components/types';
 import { Metadata, ResolvingMetadata } from 'next';
 import { ClockIcon, AcademicCapIcon, SpeakerWaveIcon, DocumentTextIcon, PlayIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import CommentSection from '../../components/CommentSection';
+import { getAllExams, getExamData } from '@/lib/examDataCache'; // Use cached data loader
 
 // Interface cho props của Page component, params là Promise
 interface ExamPageProps {
@@ -15,42 +14,14 @@ interface ExamPageProps {
   }>;
 }
 
-// Đường dẫn đến file JSON chứa dữ liệu đề thi
-const EXAMS_DATA_PATH: string = path.join(process.cwd(), 'data', 'data.json');
-
-async function getAllExams(): Promise<ExamData[]> {
-  try {
-    const fileContent: string = await fs.readFile(EXAMS_DATA_PATH, 'utf-8');
-    const allExamsData: ExamData[] = JSON.parse(fileContent);
-    if (!Array.isArray(allExamsData)) {
-        console.error("Lỗi getAllExams: Dữ liệu đọc từ file không phải là một mảng.");
-        return [];
-    }
-    return allExamsData;
-  } catch (error: any) {
-    console.error("Lỗi trong getAllExams (đọc hoặc parse file JSON):", error.message);
-    return []; 
-  }
-}
-
-async function getExamData(examId: string): Promise<ExamData | null> {
-  try {
-    const allExamsData = await getAllExams();
-    const exam = allExamsData.find(e => e.id.toString() === examId.toString());
-    return exam || null;
-  } catch (error: any) {
-    console.error(`Lỗi khi lấy dữ liệu cho exam ${examId}:`, error.message);
-    return null;
-  }
-}
-
+// Use cached data loaders - MUCH faster!
 export async function generateStaticParams(): Promise<{ examId: string }[]> {
    try {
         const allExamsData = await getAllExams();
         return allExamsData.map(exam => ({ examId: exam.id.toString() }));
    } catch (error: any) {
         console.error("Lỗi khi tạo static params:", error.message);
-        return []; 
+        return [];
    }
 }
 
