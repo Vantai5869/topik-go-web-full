@@ -1,22 +1,6 @@
 version: '3.8'
 
 services:
-  # MongoDB Database
-  mongodb:
-    image: mongo:7.0
-    container_name: topikgo-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin123
-      - MONGO_INITDB_DATABASE=topikgo
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - topikgo-network
-
   # Backend Service
   backend:
     build:
@@ -28,14 +12,9 @@ services:
       - "4201:4201"
     env_file:
       - .env
-    environment:
-      # Override MongoDB URL to use Docker container
-      - MONGODB_URL=mongodb://admin:admin123@mongodb:27017/topikgo?authSource=admin
     volumes:
       - ./SooMeta-Be:/app
       - /app/node_modules
-    depends_on:
-      - mongodb
     networks:
       - topikgo-network
 
@@ -62,7 +41,3 @@ services:
 networks:
   topikgo-network:
     driver: bridge
-
-volumes:
-  mongodb_data:
-    driver: local
