@@ -18,7 +18,7 @@ services:
     networks:
       - topikgo-network
 
-  # Frontend Service
+  # Frontend Service (Production Optimized)
   frontend:
     build:
       context: ./soometa-web
@@ -29,10 +29,8 @@ services:
       - "3081:3081"
     env_file:
       - .env
-    volumes:
-      - ./soometa-web:/app
-      - /app/node_modules
-      - /app/.next
+    environment:
+      - NODE_ENV=production
     depends_on:
       - backend
     networks:
