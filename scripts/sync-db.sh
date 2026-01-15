@@ -24,7 +24,7 @@ NC='\033[0m' # No Color
 
 # Configuration from .env
 ATLAS_URI="mongodb+srv://taipv00:taipv00@cluster0.r2r6b.mongodb.net/"
-ATLAS_DB="topikgo"
+ATLAS_DB="test"
 DOCKER_URI="mongodb://admin:admin123@localhost:27017/?authSource=admin"
 DOCKER_DB="topikgo"
 BACKUP_DIR="./db-backups"
