@@ -21,8 +21,10 @@ services:
   # Frontend Service (Production Optimized)
   frontend:
     build:
-      context: ./soometa-web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./soometa-web/Dockerfile
+      args:
+        - BUILD_CONTEXT=soometa-web
     container_name: topikgo-frontend
     restart: unless-stopped
     ports:
