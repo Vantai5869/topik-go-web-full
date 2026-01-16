@@ -132,12 +132,9 @@ router.get('/:id', authMiddleware, async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ message: 'ID người dùng không hợp lệ.' });
         }
-        // Sử dụng .lean() để tăng performance (trả về plain object thay vì Mongoose document)
-        const user = await User.findById(req.params.id).select('-password').lean();
+        const user = await User.findById(req.params.id).select('-password');
         if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
-        // Transform _id to id và loại bỏ __v
-        const { _id, __v, ...rest } = user;
-        res.json({ id: _id, ...rest });
+        res.json(user.toJSON());
     } catch (error) {
         console.error(`Error in GET /users/${req.params.id}:`, error);
         res.status(500).json({ error: 'Lỗi khi lấy thông tin người dùng.' });
