@@ -5,32 +5,12 @@ data_path="./certbot"
 email="" # Để trống nếu không muốn nhập email
 staging=0 # Đổi thành 1 nếu test (tránh rate limit)
 
-if [ -d "$data_path" ]; then
-  read -p "Certificate đã tồn tại. Thay thế? (y/N) " decision
-  if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
-    exit
-  fi
-fi
-
-echo "### Tạo dummy certificate tạm thời ..."
-path="/etc/letsencrypt/live/topikgo.com"
-mkdir -p "$data_path/conf/live/topikgo.com"
-docker-compose run --rm --entrypoint "\
-  openssl req -x509 -nodes -newkey rsa:4096 -days 1 \
-    -keyout '$path/privkey.pem' \
-    -out '$path/fullchain.pem' \
-    -subj '/CN=localhost'" certbot
+echo "### Khởi động containers với HTTP only ..."
+docker-compose up -d
 echo
 
-echo "### Khởi động nginx ..."
-docker-compose up --force-recreate -d nginx
-echo
-
-echo "### Xóa dummy certificate ..."
-docker-compose run --rm --entrypoint "\
-  rm -Rf /etc/letsencrypt/live/topikgo.com && \
-  rm -Rf /etc/letsencrypt/archive/topikgo.com && \
-  rm -Rf /etc/letsencrypt/renewal/topikgo.com.conf" certbot
+echo "### Chờ 5 giây cho nginx khởi động ..."
+sleep 5
 echo
 
 echo "### Request SSL certificate từ Let's Encrypt ..."
@@ -56,7 +36,18 @@ docker-compose run --rm --entrypoint "\
     --force-renewal" certbot
 echo
 
-echo "### Reload nginx với SSL certificate mới ..."
-docker-compose exec nginx nginx -s reload
+if [ $? -eq 0 ]; then
+  echo "### SSL certificate đã được tạo thành công!"
+  echo "### Đang bật HTTPS ..."
 
-echo "### XONG! Truy cập https://topikgo.com để kiểm tra"
+  # Copy nginx-ssl.conf thành nginx.conf
+  cp nginx/nginx-ssl.conf nginx/nginx.conf
+
+  # Reload nginx
+  docker-compose exec nginx nginx -s reload
+
+  echo "### XONG! Truy cập https://topikgo.com"
+else
+  echo "### LỖI: Không thể tạo SSL certificate"
+  echo "### Website vẫn chạy trên http://topikgo.com"
+fi
