@@ -20,6 +20,7 @@ import pageViewsRoutes from './routes/pageviews.js';
 import practiceHistoryRoutes from './routes/practiceHistoryRoutes.js';
 import downloadStatsRoutes from './routes/downloadStatsRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
+import savedVideoRoutes from './routes/savedVideoRoutes.js';
 // import { AssemblyAI } from 'assemblyai'; // Bỏ comment nếu bạn dùng AssemblyAI ở đây
 import nodemailer from 'nodemailer';
 
@@ -62,6 +63,7 @@ app.use('/pageviews', pageViewsRoutes);
 app.use('/practice-history', practiceHistoryRoutes);
 app.use('/download-stats', downloadStatsRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/saved-videos', savedVideoRoutes);
 app.post('/send-mail', async (req, res) => {
   const { email, code } = req.body;
 

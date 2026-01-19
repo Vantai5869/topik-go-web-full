@@ -82,15 +82,22 @@ const DeviceMobileIcon = React.memo(({ className }: { className?: string }) => (
 DeviceMobileIcon.displayName = 'DeviceMobileIcon';
 
 const ChevronDownIcon = React.memo(({ className }: { className?: string }) => (
-  <svg 
-    className={`ml-0.5 h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 shrink-0 ${className || ''}`} 
-    viewBox="0 0 20 20" 
+  <svg
+    className={`ml-0.5 h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 shrink-0 ${className || ''}`}
+    viewBox="0 0 20 20"
     fill="currentColor"
   >
     <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clipRule="evenodd" />
   </svg>
 ));
 ChevronDownIcon.displayName = 'ChevronDownIcon';
+
+const YouTubeIcon = React.memo(({ className }: { className?: string }) => (
+  <svg className={`w-4 h-4 mr-2.5 text-slate-500 dark:text-slate-400 group-hover:text-current ${className || ''}`} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+));
+YouTubeIcon.displayName = 'YouTubeIcon';
 
 // ... các hàm và useEffects khác của bạn giữ nguyên ...
 
@@ -355,7 +362,8 @@ const handleSaveName = async () => {
             {/* Giữ nguyên các link navList bạn đã cung cấp */}
             <li><Link href="/exams" className={isActive('/exams') ? styles.activeLink : styles.navLinkItem}>Thi Thử</Link></li>
             <li><Link href="/practice" className={isActive('/practice') ? styles.activeLink : styles.navLinkItem}>Luyện Tập</Link></li>
-            
+            <li><Link href="/youtube-player" className={isActive('/youtube-player') ? styles.activeLink : styles.navLinkItem}>Video</Link></li>
+
             <li className="relative" ref={docsMenuRef}>
               <button 
                 onClick={() => setIsDocsMenuOpen(!isDocsMenuOpen)}
@@ -573,7 +581,13 @@ const handleSaveName = async () => {
             <li><Link href="/" onClick={closeMobileMenu} className={isActive('/') ? styles.mobileActiveLink : styles.mobileNavLinkItem}>Trang Chủ</Link></li>
             <li><Link href="/exams" onClick={closeMobileMenu} className={isActive('/exams') ? styles.mobileActiveLink : styles.mobileNavLinkItem}>Luyện Đề</Link></li>
             <li><Link href="/practice" onClick={closeMobileMenu} className={isActive('/practice') ? styles.mobileActiveLink : styles.mobileNavLinkItem}>Luyện Dạng</Link></li>
-            
+            <li><Link href="/youtube-player" onClick={closeMobileMenu} className={isActive('/youtube-player') ? styles.mobileActiveLink : styles.mobileNavLinkItem}>
+              <div className="flex items-center">
+                <YouTubeIcon className="mr-3 text-gray-400" />
+                <span>Video Học Tập</span>
+              </div>
+            </Link></li>
+
             <li className="px-5 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest dark:text-slate-500">Tài liệu</li>
             <li>
               <Link href="/download" onClick={closeMobileMenu} className={isActive('/download') ? styles.mobileActiveLink : styles.mobileNavLinkItem}>

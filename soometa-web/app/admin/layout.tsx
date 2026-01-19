@@ -12,6 +12,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://soometa-be
 const sidebarItems = [
   { name: 'Dashboard', href: '/admin/dashboard' },
   { name: 'Users', href: '/admin/users' },
+  { name: 'Saved Videos', href: '/admin/saved-videos' },
   { name: 'Transcriptions', href: '/admin/transcriptions' },
   { name: 'Exam stats', href: '/admin/exam-stats' },
   { name: 'Download Stats', href: '/admin/download-stats' },
