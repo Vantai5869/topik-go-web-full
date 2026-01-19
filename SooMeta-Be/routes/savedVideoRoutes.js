@@ -318,9 +318,14 @@ router.get('/admin/users', authMiddleware, adminAuthMiddleware, async (req, res)
         }
       },
       {
+        $addFields: {
+          userIdObj: { $toObjectId: '$_id' }
+        }
+      },
+      {
         $lookup: {
           from: 'users',
-          localField: '_id',
+          localField: 'userIdObj',
           foreignField: '_id',
           as: 'userInfo'
         }
