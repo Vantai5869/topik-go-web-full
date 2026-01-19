@@ -11,8 +11,8 @@ export type UserData = {
   [key: string]: any; 
 };
 
-// URL cơ sở của API backend (nên đặt trong .env.local)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://soometa-be.onrender.com';
+// Use empty string for relative URLs - nginx proxies to backend
+const API_BASE_URL = '';
 
 // Hàm tiện ích getOrGenerateDeviceId (có thể đặt trong file utils riêng)
 export const getOrGenerateDeviceId = (): string => {

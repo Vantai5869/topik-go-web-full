@@ -53,7 +53,8 @@ export default function EnhancedActivityTracker() {
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const entryTimeRef = useRef<number>(Date.now());
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4201';
+  // Use empty string to make relative URLs - nginx will proxy to backend
+  const API_BASE_URL = '';
 
   // Initialize session ID on mount (client-side only)
   useEffect(() => {

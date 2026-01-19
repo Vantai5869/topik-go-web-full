@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-// Lấy base URL từ environment variable
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://soometa-be.onrender.com';
+// Use empty string for relative URLs - nginx will proxy backend routes
+// In production, nginx routes /users, /pageviews, etc. to backend:4201
+const API_BASE_URL = '';
 
 // Tạo axios instance với cấu hình mặc định
 const apiClient: AxiosInstance = axios.create({

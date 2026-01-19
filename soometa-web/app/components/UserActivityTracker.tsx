@@ -31,7 +31,7 @@ export default function UserActivityTracker() {
 
       // Debounce 300ms để tránh spam khi user navigate nhanh
       debounceTimerRef.current = setTimeout(() => {
-        const NEXT_PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4201';
+        const NEXT_PUBLIC_API_BASE_URL = '';
 
         // Fire-and-forget: không await, không block UI
         fetch(`${NEXT_PUBLIC_API_BASE_URL}/analytics/track-visit`, {
