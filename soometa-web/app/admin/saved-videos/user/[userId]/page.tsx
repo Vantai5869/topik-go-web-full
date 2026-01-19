@@ -47,11 +47,11 @@ export default function UserVideosPage() {
 
       setLoading(true);
       try {
-        const url = new URL(`${API_BASE_URL}/saved-videos/admin/user/${userId}`);
-        url.searchParams.set('page', page.toString());
-        url.searchParams.set('limit', '20');
+        const params = new URLSearchParams();
+        params.set('page', page.toString());
+        params.set('limit', '20');
 
-        const response = await fetch(url.toString(), {
+        const response = await fetch(`${API_BASE_URL}/saved-videos/admin/user/${userId}?${params.toString()}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
