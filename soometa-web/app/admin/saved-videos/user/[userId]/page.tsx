@@ -39,6 +39,7 @@ export default function UserVideosPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedVideo, setSelectedVideo] = useState<SavedVideo | null>(null);
 
   useEffect(() => {
     const fetchUserVideos = async () => {
@@ -211,7 +212,13 @@ export default function UserVideosPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col justify-start">
+                    <div className="flex flex-col gap-2 justify-start">
+                      <button
+                        onClick={() => setSelectedVideo(video)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                      >
+                        View Video
+                      </button>
                       <button
                         onClick={() => handleDelete(video.videoId)}
                         className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
@@ -248,6 +255,100 @@ export default function UserVideosPage() {
           </div>
         )}
       </div>
+
+      {/* Video Player Popup */}
+      {selectedVideo && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedVideo(null)}
+        >
+          <div
+            className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {selectedVideo.title || 'Video Player'}
+              </h2>
+              <button
+                onClick={() => setSelectedVideo(null)}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6">
+              {/* YouTube Player */}
+              <div className="aspect-video mb-6">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${selectedVideo.videoId}`}
+                  title={selectedVideo.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="rounded-lg"
+                ></iframe>
+              </div>
+
+              {/* Video Info */}
+              <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <span className="text-sm text-gray-600 font-medium">Language:</span>
+                  <div className="text-gray-900">{selectedVideo.lang}</div>
+                </div>
+                {selectedVideo.translatedTo && (
+                  <div>
+                    <span className="text-sm text-gray-600 font-medium">Translated to:</span>
+                    <div className="text-gray-900">{selectedVideo.translatedTo}</div>
+                  </div>
+                )}
+                <div>
+                  <span className="text-sm text-gray-600 font-medium">Subtitles:</span>
+                  <div className="text-gray-900">{selectedVideo.subtitles.length} segments</div>
+                </div>
+                {selectedVideo.translatedSubtitles.length > 0 && (
+                  <div>
+                    <span className="text-sm text-gray-600 font-medium">Translated subtitles:</span>
+                    <div className="text-gray-900">{selectedVideo.translatedSubtitles.length} segments</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Subtitles Section */}
+              {selectedVideo.subtitles.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Subtitles Preview</h3>
+                  <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+                    <div className="space-y-2">
+                      {selectedVideo.subtitles.slice(0, 20).map((sub: any, index: number) => (
+                        <div key={index} className="text-sm">
+                          <span className="text-gray-500 font-mono mr-2">
+                            {Math.floor(sub.start / 1000 / 60)}:{String(Math.floor(sub.start / 1000) % 60).padStart(2, '0')}
+                          </span>
+                          <span className="text-gray-900">{sub.text}</span>
+                          {selectedVideo.translatedSubtitles[index] && (
+                            <div className="ml-12 text-gray-600 italic">
+                              {selectedVideo.translatedSubtitles[index].text}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {selectedVideo.subtitles.length > 20 && (
+                        <div className="text-center text-gray-500 text-sm pt-2">
+                          ... and {selectedVideo.subtitles.length - 20} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
