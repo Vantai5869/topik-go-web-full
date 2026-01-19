@@ -581,6 +581,58 @@ export default function YouTubePlayerPage() {
           <div className={styles.error}>{error}</div>
         )}
 
+        {!videoId && savedVideos.length === 0 && (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyStateContent}>
+              <svg
+                className={styles.emptyStateIcon}
+                width="80"
+                height="80"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <path d="M23 7l-7 5 7 5V7z" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+              </svg>
+              <h2 className={styles.emptyStateTitle}>Chưa có video nào</h2>
+              <p className={styles.emptyStateText}>
+                Bắt đầu bằng cách thêm video YouTube để học với phụ đề và bản dịch
+              </p>
+              <button
+                className={styles.emptyStateButton}
+                onClick={() => setShowAddForm(true)}
+              >
+                + Thêm video đầu tiên
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!videoId && savedVideos.length > 0 && (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyStateContent}>
+              <svg
+                className={styles.emptyStateIcon}
+                width="80"
+                height="80"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+              </svg>
+              <h2 className={styles.emptyStateTitle}>Chọn video để bắt đầu</h2>
+              <p className={styles.emptyStateText}>
+                Click vào video bên cạnh để xem phụ đề và học ngay
+              </p>
+            </div>
+          </div>
+        )}
+
         {videoId && (
           <div className={styles.playerContainer}>
             <div className={styles.videoWrapper}>

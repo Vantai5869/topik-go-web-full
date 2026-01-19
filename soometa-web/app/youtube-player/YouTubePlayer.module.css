@@ -1213,3 +1213,92 @@
     color: #a0aec0;
   }
 }
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  width: 100%;
+}
+
+.emptyStateContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+.emptyStateIcon {
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+.emptyStateTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.75rem 0;
+}
+
+.emptyStateText {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
+.emptyStateButton {
+  padding: 0.875rem 2rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.emptyStateButton:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.emptyStateButton:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .emptyState {
+    min-height: 400px;
+  }
+
+  .emptyStateContent {
+    padding: 1.5rem;
+  }
+
+  .emptyStateIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .emptyStateTitle {
+    font-size: 1.25rem;
+  }
+
+  .emptyStateText {
+    font-size: 0.9rem;
+  }
+
+  .emptyStateButton {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
