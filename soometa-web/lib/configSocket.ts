@@ -1,7 +1,19 @@
 import { io, Socket } from 'socket.io-client';
 
 // Lấy socket server URL từ environment variable
-const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || 'https://soometa-be.onrender.com';
+// Trong production, sử dụng domain hiện tại của website
+const getSocketServerUrl = () => {
+  if (typeof window !== 'undefined') {
+    // Client-side: dùng domain hiện tại
+    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+    const host = window.location.host;
+    return `${protocol}//${host}`;
+  }
+  // Server-side fallback
+  return process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || '';
+};
+
+const SOCKET_SERVER_URL = getSocketServerUrl();
 
 // Tạo socket instance với cấu hình mặc định
 let socket: Socket | null = null;
