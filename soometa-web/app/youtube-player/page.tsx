@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './YouTubePlayer.module.css';
+import { useSavedVideos } from './useSavedVideos';
 
 interface Subtitle {
   start: number;
@@ -39,7 +40,14 @@ export default function YouTubePlayerPage() {
   const [showTranslation, setShowTranslation] = useState(false);
   const [translationLoading, setTranslationLoading] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const [savedVideos, setSavedVideos] = useState<SavedVideo[]>([]);
+  const {
+    savedVideos,
+    isLoading: savedVideosLoading,
+    error: savedVideosError,
+    addVideo: addVideoToList,
+    deleteVideo: deleteVideoFromList,
+    updateVideoTitle
+  } = useSavedVideos();
   const [showAddForm, setShowAddForm] = useState(false);
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
@@ -82,25 +90,6 @@ export default function YouTubePlayerPage() {
     }
   }, [showLangDropdown]);
 
-  // Load saved videos from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('youtube-saved-videos');
-    if (saved) {
-      try {
-        setSavedVideos(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to load saved videos:', e);
-      }
-    }
-  }, []);
-
-  // Save videos to localStorage whenever it changes
-  useEffect(() => {
-    if (savedVideos.length > 0) {
-      localStorage.setItem('youtube-saved-videos', JSON.stringify(savedVideos));
-    }
-  }, [savedVideos]);
-
   // Load YouTube IFrame API
   useEffect(() => {
     if (typeof window !== 'undefined' && !(window as any).YT) {
@@ -124,30 +113,18 @@ export default function YouTubePlayerPage() {
     return null;
   };
 
-  const saveCurrentVideo = (title?: string, tempVideoId?: string) => {
+  const saveCurrentVideo = async (title?: string, tempVideoId?: string) => {
     const currentVideoId = tempVideoId || videoId;
     if (!currentVideoId) return;
 
-    const thumbnail = `https://img.youtube.com/vi/${currentVideoId}/mqdefault.jpg`;
-    const newVideo: SavedVideo = {
-      id: currentVideoId,
-      url: videoUrl,
-      title: title || customTitle || `Video ${currentVideoId}`,
-      thumbnail,
-      lang,
-      addedAt: Date.now()
-    };
+    const videoTitle = title || customTitle || `Video ${currentVideoId}`;
 
-    // Check if video already exists
-    if (!savedVideos.some(v => v.id === currentVideoId)) {
-      setSavedVideos([newVideo, ...savedVideos]);
+    const result = await addVideoToList(currentVideoId, videoTitle, lang, subtitles);
+
+    if (!result.success && result.error) {
+      setError(result.error);
+      setTimeout(() => setError(''), 5000); // Clear error after 5s
     }
-  };
-
-  const updateVideoTitle = (id: string, newTitle: string) => {
-    setSavedVideos(savedVideos.map(v =>
-      v.id === id ? { ...v, title: newTitle } : v
-    ));
   };
 
   const loadSavedVideo = (video: SavedVideo) => {
@@ -158,7 +135,7 @@ export default function YouTubePlayerPage() {
   };
 
   const deleteVideo = (id: string) => {
-    setSavedVideos(savedVideos.filter(v => v.id !== id));
+    deleteVideoFromList(id);
     if (videoId === id) {
       setVideoId('');
       setSubtitles([]);
@@ -300,14 +277,12 @@ export default function YouTubePlayerPage() {
       const finalTitle = savedTitle || title;
 
       // Update the video title in the list
-      setSavedVideos(prev => prev.map(v =>
-        v.id === extractedId ? { ...v, title: finalTitle } : v
-      ));
+      updateVideoTitle(extractedId, finalTitle);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tải video');
       // Remove video from list if failed
       if (!customId) {
-        setSavedVideos(prev => prev.filter(v => v.id !== extractedId));
+        deleteVideoFromList(extractedId);
       }
     } finally {
       setLoading(false);
