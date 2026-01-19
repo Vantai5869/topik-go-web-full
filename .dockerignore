@@ -1,0 +1,69 @@
+# Git
+.git
+.gitignore
+.github
+
+# SSL/Certificate files
+certbot/
+*.pem
+*.key
+*.crt
+
+# Node modules (handled in specific service dockerignore)
+**/node_modules
+**/.next
+**/build
+**/dist
+**/out
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Documentation
+*.md
+!README.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+
+# Backend specific (already in subdirectory, but just in case)
+SooMeta-Be/node_modules
+SooMeta-Be/dist
+
+# Frontend specific
+soometa-web/node_modules
+soometa-web/.next
+
+# Other services
+fetch-sub-youtube-python/__pycache__
+fetch-sub-youtube-python/*.pyc
