@@ -5,7 +5,7 @@ import { useAuthStore } from '@/app/store/authStore';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4201';
+const API_BASE_URL = '';
 
 interface User {
   _id: string;

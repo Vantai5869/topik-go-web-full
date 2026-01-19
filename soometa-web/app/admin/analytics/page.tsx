@@ -54,7 +54,7 @@ export default function AdminAnalyticsPage() {
     setLoading(true);
     setError(null);
     try {
-      const NEXT_PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4201';
+      const NEXT_PUBLIC_API_BASE_URL = '';
       const response = await fetch(`${NEXT_PUBLIC_API_BASE_URL}/analytics/daily-user-stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,

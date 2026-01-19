@@ -48,7 +48,7 @@ export default function PageAnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState(7); // Last 7 days
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4201';
+  const API_BASE_URL = '';
 
   useEffect(() => {
     if (!_isLoadingAuth) {

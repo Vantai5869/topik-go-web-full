@@ -1,7 +1,7 @@
 // lib/savedVideos.ts
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4201';
+const API_BASE_URL = '';
 const STORAGE_KEY = 'saved_videos';
 const MAX_GUEST_VIDEOS = 3;
 
