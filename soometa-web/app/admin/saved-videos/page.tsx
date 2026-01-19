@@ -70,14 +70,14 @@ export default function SavedVideosPage() {
 
       setLoading(true);
       try {
-        const url = new URL(`${API_BASE_URL}/saved-videos/admin/users`);
-        url.searchParams.set('page', page.toString());
-        url.searchParams.set('limit', '20');
+        const params = new URLSearchParams();
+        params.set('page', page.toString());
+        params.set('limit', '20');
         if (search) {
-          url.searchParams.set('search', search);
+          params.set('search', search);
         }
 
-        const response = await fetch(url.toString(), {
+        const response = await fetch(`${API_BASE_URL}/saved-videos/admin/users?${params.toString()}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
