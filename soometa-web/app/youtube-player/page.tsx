@@ -113,20 +113,6 @@ export default function YouTubePlayerPage() {
     return null;
   };
 
-  const saveCurrentVideo = async (title?: string, tempVideoId?: string) => {
-    const currentVideoId = tempVideoId || videoId;
-    if (!currentVideoId) return;
-
-    const videoTitle = title || customTitle || `Video ${currentVideoId}`;
-
-    const result = await addVideoToList(currentVideoId, videoTitle, lang, subtitles);
-
-    if (!result.success && result.error) {
-      setError(result.error);
-      setTimeout(() => setError(''), 5000); // Clear error after 5s
-    }
-  };
-
   const loadSavedVideo = (video: SavedVideo) => {
     setVideoUrl(video.url);
     setLang(video.lang);
@@ -203,11 +189,6 @@ export default function YouTubePlayerPage() {
     setCustomTitle('');
     setVideoUrl('');
 
-    // Add video to sidebar immediately (even before loading)
-    if (!customId && !savedVideos.some(v => v.id === extractedId)) {
-      saveCurrentVideo(savedTitle || 'Đang tải...', extractedId);
-    }
-
     setError('');
     setLoading(true);
     setVideoId(extractedId);
@@ -225,9 +206,11 @@ export default function YouTubePlayerPage() {
 
       const data: SubtitleResponse = await response.json();
 
+      let convertedSubtitles: { start: number; duration: number; text: string }[] = [];
+
       if (data.subtitles && Array.isArray(data.subtitles)) {
         // Convert milliseconds to seconds
-        const convertedSubtitles = data.subtitles.map((sub: any) => ({
+        convertedSubtitles = data.subtitles.map((sub: any) => ({
           start: sub.start / 1000,      // ms to seconds
           duration: sub.duration / 1000, // ms to seconds
           text: sub.text
@@ -272,12 +255,18 @@ export default function YouTubePlayerPage() {
         });
       };
 
-      // Update video title after getting it from YouTube
+      // Get video title from YouTube
       const title = await getVideoTitle();
       const finalTitle = savedTitle || title;
 
-      // Update the video title in the list
-      updateVideoTitle(extractedId, finalTitle);
+      // Save video to list only after we have real title (if it's a new video)
+      if (!customId && !savedVideos.some(v => v.id === extractedId)) {
+        const result = await addVideoToList(extractedId, finalTitle, useLang, convertedSubtitles);
+        if (!result.success && result.error) {
+          setError(result.error);
+          setTimeout(() => setError(''), 5000);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tải video');
       // Remove video from list if failed
