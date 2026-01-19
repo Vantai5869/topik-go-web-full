@@ -7,7 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAuthStore, UserData } from '../store/authStore'; // Import UserData từ store
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://soometa-be.onrender.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
 const sidebarItems = [
   { name: 'Dashboard', href: '/admin/dashboard' },

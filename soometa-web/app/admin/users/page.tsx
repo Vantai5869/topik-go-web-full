@@ -19,7 +19,7 @@ export type User = AuthUserData & { // Mở rộng UserData từ store nếu c�
 
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://soometa-be.onrender.com'; // Lấy từ env
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ''; // Lấy từ env
 
 export default function UserListPage() {
   const [users, setUsers] = useState<User[]>([]);
