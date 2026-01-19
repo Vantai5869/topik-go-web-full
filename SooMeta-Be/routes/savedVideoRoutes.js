@@ -308,6 +308,13 @@ router.get('/admin/users', authMiddleware, adminAuthMiddleware, async (req, res)
     const { page = 1, limit = 20, search = '' } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
+    // Debug: Check raw saved videos data
+    const rawVideos = await SavedVideo.find().limit(3);
+    console.log('=== Debug Raw Saved Videos ===');
+    console.log('Total saved videos:', await SavedVideo.countDocuments());
+    console.log('Sample videos:', JSON.stringify(rawVideos, null, 2));
+    console.log('==============================');
+
     // Aggregate để lấy thông tin users và số lượng videos của họ
     const pipeline = [
       {
@@ -369,6 +376,13 @@ router.get('/admin/users', authMiddleware, adminAuthMiddleware, async (req, res)
     pipeline.push({ $limit: parseInt(limit) });
 
     const users = await SavedVideo.aggregate(pipeline);
+
+    // Debug logging
+    console.log('=== Admin Users List Debug ===');
+    console.log('Total users found:', total);
+    console.log('Users returned:', users.length);
+    console.log('First 2 users:', JSON.stringify(users.slice(0, 2), null, 2));
+    console.log('=============================');
 
     res.json({
       success: true,
