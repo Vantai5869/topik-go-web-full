@@ -10,7 +10,7 @@ const router = express.Router();
 // GET /saved-videos - Lấy danh sách video đã lưu của user
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.currentUser.id;
 
     const savedVideos = await SavedVideo.find({ userId })
       .sort({ updatedAt: -1 }) // Newest first
@@ -30,7 +30,7 @@ router.get('/', authMiddleware, async (req, res) => {
 // POST /saved-videos - Lưu video mới hoặc cập nhật video đã tồn tại
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.currentUser.id;
     const { videoId, title, thumbnailUrl, lang, subtitles, translatedTo, translatedSubtitles } = req.body;
 
     if (!videoId) {
@@ -92,7 +92,7 @@ router.post('/', authMiddleware, async (req, res) => {
 // PUT /saved-videos/:videoId/translation - Cập nhật bản dịch của video
 router.put('/:videoId/translation', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.currentUser.id;
     const { videoId } = req.params;
     const { translatedTo, translatedSubtitles } = req.body;
 
@@ -125,7 +125,7 @@ router.put('/:videoId/translation', authMiddleware, async (req, res) => {
 // DELETE /saved-videos/:videoId - Xóa video đã lưu
 router.delete('/:videoId', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.currentUser.id;
     const { videoId } = req.params;
 
     const result = await SavedVideo.deleteOne({ userId, videoId });
@@ -147,7 +147,7 @@ router.delete('/:videoId', authMiddleware, async (req, res) => {
 // POST /saved-videos/sync - Đồng bộ videos từ localStorage lên server
 router.post('/sync', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.currentUser.id;
     const { videos } = req.body;
 
     if (!Array.isArray(videos)) {
@@ -217,7 +217,7 @@ router.post('/sync', authMiddleware, async (req, res) => {
 // GET /saved-videos/check/:videoId - Kiểm tra xem video đã được lưu chưa
 router.get('/check/:videoId', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.currentUser.id;
     const { videoId } = req.params;
 
     const savedVideo = await SavedVideo.findOne({ userId, videoId });
