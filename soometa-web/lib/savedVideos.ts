@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const API_BASE_URL = '';
 const STORAGE_KEY = 'saved_videos';
-const MAX_GUEST_VIDEOS = 3;
+const MAX_GUEST_VIDEOS = 2;
 
 export interface SavedVideo {
   videoId: string;
