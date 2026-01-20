@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './YouTubePlayer.module.css';
 import { useSavedVideos } from './useSavedVideos';
+import { useAuthStore } from '../store/authStore';
 
 interface Subtitle {
   start: number;
@@ -51,11 +52,14 @@ export default function YouTubePlayerPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [showLoginWarning, setShowLoginWarning] = useState(false);
   const [customTitle, setCustomTitle] = useState('');
   const playerRef = useRef<any>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const subtitleRefs = useRef<(HTMLDivElement | null)[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { currentUser, token, openLoginModal } = useAuthStore();
+  const isLoggedIn = !!currentUser && !!token;
 
   // Language options for translation (removed "Không dịch" option)
   const translationLanguages = [
@@ -126,6 +130,30 @@ export default function YouTubePlayerPage() {
       setVideoId('');
       setSubtitles([]);
     }
+  };
+
+  const handleAddVideoClick = () => {
+    // Kiểm tra nếu chưa đăng nhập và đã có 2 video
+    if (!isLoggedIn && savedVideos.length >= 2) {
+      setShowLoginWarning(true);
+      return;
+    }
+    // Nếu đã đăng nhập hoặc chưa đủ 2 video, mở form thêm video
+    setShowAddForm(true);
+  };
+
+  const handleLoginFromWarning = () => {
+    setShowLoginWarning(false);
+    openLoginModal(
+      () => {
+        // Callback khi đăng nhập thành công - mở form thêm video
+        setShowAddForm(true);
+      },
+      () => {
+        // Callback khi hủy đăng nhập - không làm gì
+        console.log('Login cancelled');
+      }
+    );
   };
 
   const translateSubtitlesAsync = async (subtitles: any[], toLang: string, fromLang: string) => {
@@ -401,6 +429,46 @@ export default function YouTubePlayerPage() {
 
   return (
     <div className={styles.container}>
+      {/* Login Warning Popup */}
+      {showLoginWarning && (
+        <div className={styles.overlay} onClick={() => setShowLoginWarning(false)}>
+          <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.popupHeader}>
+              <h3 className={styles.popupTitle}>Yêu cầu đăng nhập</h3>
+              <button
+                className={styles.closeButton}
+                onClick={() => setShowLoginWarning(false)}
+                title="Đóng"
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.popupContent}>
+              <p style={{ marginBottom: '1rem', lineHeight: '1.5' }}>
+                Bạn chỉ có thể lưu tối đa 2 video khi chưa đăng nhập.
+              </p>
+              <p style={{ lineHeight: '1.5' }}>
+                Vui lòng đăng nhập để lưu thêm nhiều video!
+              </p>
+            </div>
+            <div className={styles.popupFooter}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowLoginWarning(false)}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleLoginFromWarning}
+                className={styles.importButton}
+              >
+                Đăng nhập
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add Video Popup */}
       {showAddForm && (
         <div className={styles.overlay} onClick={() => setShowAddForm(false)}>
@@ -511,7 +579,7 @@ export default function YouTubePlayerPage() {
           <h2 className={styles.sidebarTitle}>My Videos</h2>
           <button
             className={styles.addButton}
-            onClick={() => setShowAddForm(true)}
+            onClick={handleAddVideoClick}
             title="Add new video"
           >
             +
