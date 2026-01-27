@@ -55,9 +55,9 @@ const QuestionItem: React.FC<QuestionItemProps> = ({
 
     return (
         // Sử dụng cấu trúc và styling bạn cung cấp
-        <div id={`question-block-${uniqueQuestionId}`} className={`questionBlock p-2 m-2 pt-4 rounded-lg ${isChecked ? 'feedback-shown bg-gray-50' : 'bg-white'}`} data-option-type={isImageOptions ? 'image' : 'text'}>
+        <div id={`question-block-${uniqueQuestionId}`} className={`questionBlock pt-4 rounded-lg ${isChecked ? 'feedback-shown bg-gray-50' : 'bg-white'}`} data-option-type={isImageOptions ? 'image' : 'text'}>
             {/* Sử dụng cấu trúc header bạn cung cấp */}
-            <div className="questionHeader md:flex  border-gray-200"> {/* Giữ nguyên styling md:flex border-gray-200 */}
+            <div className="questionHeader  flex  border-gray-200"> {/* Giữ nguyên styling md:flex border-gray-200 */}
                 <span className="questionNumber font-bold text-gray-800 text-[1.15em] mr-2">{question.number}.</span>
                 {/* Giữ nguyên vị trí và styling questionContent bạn cung cấp */}
                 <div className="questionContent mb-5">{renderContent(question.content, false)}</div>
@@ -117,7 +117,7 @@ const QuestionItem: React.FC<QuestionItemProps> = ({
                         }
 
                         // Sử dụng liClassName bạn cung cấp
-                        const liClassName = `optionItem rounded-lg transition duration-150 ease-in-out relative flex items-baseline text-left p-0 border-none ${itemStyling} ${isImageOptions ? 'flex-col items-center justify-center text-center' : ''} ${isChecked ? 'pointer-events-none cursor-default' : 'cursor-pointer'} mb-3 last:mb-0 last:border-none ml-6 mr-6`;
+                        const liClassName = `optionItem rounded-lg transition duration-150 ease-in-out relative flex items-baseline text-left p-0 border-none ${itemStyling} ${isImageOptions ? 'flex-col items-center justify-center text-center' : ''} ${isChecked ? 'pointer-events-none cursor-default' : 'cursor-pointer'} md:mb-3 last:mb-0 last:border-none md:ml-6 md:mr-6`;
 
 
                         return (
@@ -157,7 +157,7 @@ const QuestionItem: React.FC<QuestionItemProps> = ({
                                             <img
                                                 src={opt.image_src}
                                                 alt={opt.alt || `Lựa chọn ${index + 1}`}
-                                                className={`optionImage max-w-[210px] max-h-[210px] rounded-md mx-auto block object-contain bg-white ${
+                                                className={`optionImage  md:max-w-[210px] md:max-h-[210px] rounded-md mx-auto block object-contain bg-white ${
                                                     isChecked
                                                         ? (opt.is_correct
                                                             ? 'border-2 border-green-500'

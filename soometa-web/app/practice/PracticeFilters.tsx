@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Select, { MultiValue } from 'react-select';
 import { Exam, ReactSelectOption } from './types';
 import { normalizeInstruction } from './utils';
@@ -30,24 +30,46 @@ const PracticeFilters: React.FC<PracticeFiltersProps> = ({
     filteredExamsByLevelSkill,
     instructionTypeOptions,
 }) => {
+    // --- Options for react-select ---
+    const levelOptions = [
+        { value: 'TOPIK Ⅰ', label: 'TOPIK I' },
+        { value: 'TOPIK Ⅱ', label: 'TOPIK II' }
+    ];
 
-    const handleLevelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const newLevel = event.target.value;
+    const skillOptions = [
+        { value: '듣기', label: 'Nghe (듣기)' },
+        { value: '읽기', label: 'Đọc (읽기)' }
+    ];
+
+    const examOptions = useMemo(() => [
+        { value: 'all', label: '-- Tất cả phù hợp --' },
+        ...filteredExamsByLevelSkill.map((exam) => ({
+            value: exam.id,
+            label: `(${exam.id}) ${exam.year_description} ${exam.exam_number_description}`
+        }))
+    ], [filteredExamsByLevelSkill]);
+
+    // --- Handlers for react-select ---
+    const handleLevelChange = (selectedOption: any) => {
+        const newLevel = selectedOption?.value;
+        if (!newLevel) return;
         setSelectedLevel(newLevel);
         setSelectedSkill(newLevel === 'TOPIK Ⅰ' ? '듣기' : selectedSkill);
         setSelectedExamId('all');
         setSelectedInstructions([]);
     };
 
-    const handleSkillChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const newSkill = event.target.value;
+    const handleSkillChange = (selectedOption: any) => {
+        const newSkill = selectedOption?.value;
+        if (!newSkill) return;
         setSelectedSkill(newSkill);
         setSelectedExamId('all');
         setSelectedInstructions([]);
     };
 
-    const handleExamChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const newExamId = event.target.value;
+    const handleExamChange = (selectedOption: any) => {
+        const newExamId = selectedOption?.value;
+        if (!newExamId) return;
         setSelectedExamId(newExamId);
     };
 
@@ -56,50 +78,68 @@ const PracticeFilters: React.FC<PracticeFiltersProps> = ({
         setSelectedInstructions(selectedValues);
     };
 
+    const commonStyles = {
+        control: (base: any, state: any) => ({
+            ...base,
+            minHeight: '42px',
+            borderColor: state.isFocused ? '#93c5fd' : '#d1d5db',
+            boxShadow: state.isFocused ? '0 0 0 1px #bfdbfe' : 'none',
+            '&:hover': {
+                borderColor: '#93c5fd',
+            },
+            borderRadius: '0.375rem',
+            backgroundColor: 'white',
+        }),
+        menu: (base: any) => ({ ...base, zIndex: 20 }),
+        option: (base: any, state: any) => ({
+            ...base,
+            backgroundColor: state.isFocused ? '#eef2ff' : state.isSelected ? '#bfdbfe' : null,
+            color: state.isSelected ? '#1e3a8a' : '#374151',
+            cursor: 'pointer',
+        }),
+    };
+
     return (
-        <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm mb-8 space-y-6 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
+        <div className="bg-white md:p-8 md:rounded-lg md:shadow-sm mb-8 space-y-6 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
             <div className="filter-item">
-                <label htmlFor="level-select" className="block mb-1.5 text-sm font-medium text-gray-700">Cấp độ:</label>
-                <select
-                    id="level-select"
-                    value={selectedLevel}
+                <label htmlFor="level-select-react" className="block mb-1.5 text-sm font-medium text-gray-700">Cấp độ:</label>
+                <Select
+                    inputId="level-select-react"
+                    options={levelOptions}
+                    value={levelOptions.find(opt => opt.value === selectedLevel)}
                     onChange={handleLevelChange}
-                    className="w-full py-2 px-3 border border-gray-300 rounded-md bg-white text-base shadow-none focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 hover:border-blue-200 transition duration-150 ease-in-out" // Removed shadow, softer ring/border on focus/hover
-                >
-                    <option value="TOPIK Ⅰ">TOPIK I</option>
-                    <option value="TOPIK Ⅱ">TOPIK II</option>
-                </select>
+                    styles={commonStyles}
+                    isSearchable={false}
+                    classNamePrefix="react-select"
+                />
             </div>
             <div className="filter-item">
-                <label htmlFor="skill-select" className="block mb-1.5 text-sm font-medium text-gray-700">Kỹ năng:</label>
-                <select
-                    id="skill-select"
-                    value={selectedSkill}
+                <label htmlFor="skill-select-react" className="block mb-1.5 text-sm font-medium text-gray-700">Kỹ năng:</label>
+                <Select
+                    inputId="skill-select-react"
+                    options={skillOptions}
+                    value={skillOptions.find(opt => opt.value === selectedSkill)}
                     onChange={handleSkillChange}
-                    className="w-full py-2 px-3 border border-gray-300 rounded-md bg-white text-base shadow-none focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 hover:border-blue-200 transition duration-150 ease-in-out" // Removed shadow, softer ring/border on focus/hover
-                >
-                    <option value="듣기">Nghe (듣기)</option>
-                    <option value="읽기">Đọc (읽기)</option>
-                </select>
+                    styles={commonStyles}
+                    isSearchable={false}
+                    classNamePrefix="react-select"
+                />
             </div>
             <div className="filter-item">
-                <label htmlFor="exam-select" className="block mb-1.5 text-sm font-medium text-gray-700">Kỳ thi ({filteredExamsByLevelSkill.length}):</label>
-                <select
-                    id="exam-select"
-                    value={selectedExamId}
+                <label htmlFor="exam-select-react" className="block mb-1.5 text-sm font-medium text-gray-700">Kỳ thi ({filteredExamsByLevelSkill.length}):</label>
+                <Select
+                    inputId="exam-select-react"
+                    options={examOptions}
+                    value={examOptions.find(opt => opt.value === selectedExamId)}
                     onChange={handleExamChange}
-                    className="w-full py-2 px-3 border border-gray-300 rounded-md bg-white text-base shadow-none focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 hover:border-blue-200 transition duration-150 ease-in-out" // Removed shadow, softer ring/border on focus/hover
-                >
-                    <option value="all">-- Tất cả phù hợp --</option>
-                    {filteredExamsByLevelSkill.map((exam) => (
-                        <option key={exam.id} value={exam.id}>
-                            ({exam.id}) {exam.year_description} {exam.exam_number_description}
-                        </option>
-                    ))}
-                </select>
+                    styles={commonStyles}
+                    classNamePrefix="react-select"
+                    noOptionsMessage={() => "Không có kỳ thi nào"}
+                    placeholder="Chọn kỳ thi..."
+                />
             </div>
 
-            <div className="md:col-span-3 bg-gray-50 p-6 rounded-md border border-gray-200">
+            <div className="md:col-span-3 bg-gray-50 md:p-6 md:rounded-md md:border md:border-gray-200">
                 <label htmlFor="instruction-select-react" className="block mb-2 text-base font-medium text-gray-700"> Chọn dạng yêu cầu (có thể chọn nhiều): </label>
                 <Select
                     inputId="instruction-select-react"
@@ -114,32 +154,10 @@ const PracticeFilters: React.FC<PracticeFiltersProps> = ({
                     className="text-base react-select-container"
                     classNamePrefix="react-select"
                     styles={{
-                        control: (base, state) => ({
-                            ...base,
-                            minHeight: '42px',
-                            // Softer border/ring on focus/hover
-                            borderColor: state.isFocused ? '#93c5fd' : '#d1d5db', // blue-300 focus, gray-300 default
-                            boxShadow: state.isFocused ? '0 0 0 1px #bfdbfe' : 'none', // blue-200 1px ring, no other shadow
-                            '&:hover': {
-                                borderColor: '#93c5fd', // blue-300 focus hover
-                            },
-                            borderRadius: '0.375rem'
-                        }),
-                        // Softer styling for multi-value tags
-                        multiValue: (base) => ({ ...base, backgroundColor: '#eef2ff', borderRadius: '0.25rem' }), // indigo-100
-                        multiValueLabel: (base) => ({ ...base, color: '#4338ca', fontSize: '0.875rem' }), // indigo-700
-                        multiValueRemove: (base) => ({ ...base, color: '#6366f1', ':hover': { backgroundColor: '#c7d2fe', color: '#3730a3' } }), // indigo-500, indigo-300, indigo-900
-                        menu: (base) => ({ ...base, zIndex: 20 }),
-                        // Optional: Customize option hover/selected in dropdown menu if needed
-                        // option: (base, state) => ({
-                        //     ...base,
-                        //     backgroundColor: state.isFocused ? '#eef2ff' : state.isSelected ? '#bfdbfe' : null, // indigo-100 hover, blue-200 selected
-                        //     color: state.isSelected ? '#1e3a8a' : '#374151', // blue-900 selected, gray-700 default
-                        //     ':active': {
-                        //         ...base[':active'],
-                        //         backgroundColor: state.isSelected ? '#bfdbfe' : '#d1d5db', // blue-200 or gray-300 on click
-                        //     },
-                        // }),
+                        ...commonStyles,
+                        multiValue: (base) => ({ ...base, backgroundColor: '#eef2ff', borderRadius: '0.25rem' }),
+                        multiValueLabel: (base) => ({ ...base, color: '#4338ca', fontSize: '0.875rem' }),
+                        multiValueRemove: (base) => ({ ...base, color: '#6366f1', ':hover': { backgroundColor: '#c7d2fe', color: '#3730a3' } }),
                     }}
                 />
                 {instructionTypeOptions.length === 0 && (

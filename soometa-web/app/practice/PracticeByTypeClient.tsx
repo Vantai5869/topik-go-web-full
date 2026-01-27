@@ -199,7 +199,7 @@ const PracticeByTypeClient: React.FC<PracticeByTypeClientProps> = ({ allExams })
         }
     }, [selectedLevel, selectedSkill, selectedExamId, selectedInstructions, hasHydrated]);
 
-     useEffect(() => {
+    useEffect(() => {
         const playerToClean = activeAudioPlayer;
         return () => {
             if (playerToClean && !playerToClean.paused) {
@@ -466,20 +466,25 @@ const PracticeByTypeClient: React.FC<PracticeByTypeClientProps> = ({ allExams })
                     instructionTypeOptions={instructionTypeOptions}
                 />
                 {/* Thêm 4 option radio filter dưới đây */}
-                <div className="flex justify-center gap-6 mt-6 mb-8">
-                    {[FILTER_ALL, FILTER_DONE, FILTER_UNDONE, FILTER_STATISTIC].map(f => (
-                        <label key={f} className={`flex items-center cursor-pointer font-medium text-base ${activeFilter === f ? 'text-blue-700' : 'text-gray-600'}`}>
-                            <input
-                                type="radio"
-                                name="practice-filter"
-                                value={f}
-                                checked={activeFilter === f}
-                                onChange={() => setActiveFilter(f)}
-                                className="accent-blue-600 mr-2"
-                            />
-                            {FILTER_LABELS[f]}
-                        </label>
-                    ))}
+                <div className="mt-6 mb-10 overflow-hidden">
+                    <div className="flex overflow-x-auto gap-2.5 pb-2 px-1 no-scrollbar scroll-smooth flex-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                        {[FILTER_ALL, FILTER_DONE, FILTER_UNDONE, FILTER_STATISTIC].map(f => (
+                            <button
+                                key={f}
+                                onClick={(e) => {
+                                    setActiveFilter(f);
+                                    e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                                }}
+                                className={`whitespace-nowrap px-6 py-2 rounded-full text-sm font-bold transition-all duration-200 border ${
+                                    activeFilter === f 
+                                    ? 'bg-slate-900 text-white border-slate-900 shadow-md transform scale-[1.05]' 
+                                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                }`}
+                            >
+                                {FILTER_LABELS[f]}
+                            </button>
+                        ))}
+                    </div>
                 </div>
                 {/* Hiển thị nút đăng nhập nếu chưa đăng nhập và chọn filter cần đăng nhập */}
                 {(['done', 'undone', 'statistic'].includes(activeFilter) && !currentUser) && (
